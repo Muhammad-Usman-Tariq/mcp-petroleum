@@ -51,13 +51,9 @@ class MasterDB:
 
     async def connect(self):
         self.pool = await asyncpg.create_pool(
-            dsn=os.getenv("MASTER_DB_HOST"),
-            port=int(os.getenv("MASTER_DB_PORT", 5432)),
-            user=os.getenv("MASTER_DB_USER"),
-            password=os.getenv("MASTER_DB_PASSWORD"),
-            database=os.getenv("MASTER_DB_NAME"),
-            min_size=1,
-            max_size=10,
+            dsn=os.getenv("DATABASE_URL"),
+              min_size=1,
+              max_size=10,
         )
         await self._init_tables()
 
