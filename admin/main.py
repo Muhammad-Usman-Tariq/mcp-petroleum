@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(lifespan=lifespan)
-templates = Jinja2Templates(directory="admin/templates")
+templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 
 ADMIN_SECRET = os.getenv("ADMIN_SECRET", "change-me-in-production")
 
