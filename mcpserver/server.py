@@ -5,7 +5,7 @@ from typing import AsyncIterator
 from mcp.types import Tool
 from core.database import MasterDB
 from core.auth import validate_token, AuthError
-from mcp.tools import (
+from mcpserver.tools import (
     tool_list_tables, tool_describe_table, tool_query,
     tool_sales_summary, tool_stock_status, tool_invoice_totals,
     tool_month_comparison, tool_low_stock_alert, tool_top_products,
