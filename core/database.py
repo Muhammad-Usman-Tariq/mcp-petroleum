@@ -52,7 +52,7 @@ class MasterDB:
     async def connect(self):
         self.pool = await aiomysql.create_pool(
             host=os.getenv("MASTER_DB_HOST"),
-            port=int(os.getenv("MASTER_DB_PORT", 3306)),
+            port=int(os.getenv("MASTER_DB_PORT", 5432)),
             user=os.getenv("MASTER_DB_USER"),
             password=os.getenv("MASTER_DB_PASSWORD"),
             db=os.getenv("MASTER_DB_NAME"),
