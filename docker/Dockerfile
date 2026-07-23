@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 8000 8001
 
-CMD ["sh", "-c", "uvicorn mcp.server:app --host 0.0.0.0 --port 8000 & uvicorn admin.main:app --host 0.0.0.0 --port 8001"]
+CMD ["sh", "-c", "uvicorn mcpserver.server:app --host 0.0.0.0 --port 8000 & uvicorn admin.main:app --host 0.0.0.0 --port 8001"]
