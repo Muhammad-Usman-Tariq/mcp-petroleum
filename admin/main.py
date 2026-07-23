@@ -3,7 +3,8 @@ from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
-from pydantic import BaseModel, EmailStr
+from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
 from typing import Optional
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
@@ -21,7 +22,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(lifespan=lifespan)
-templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 ADMIN_SECRET = os.getenv("ADMIN_SECRET", "change-me-in-production")
 
@@ -42,7 +45,7 @@ class CreateClientRequest(BaseModel):
     db_schema: Optional[str] = None
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
