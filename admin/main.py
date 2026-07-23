@@ -1,7 +1,6 @@
 import os
+import pathlib
 from fastapi import FastAPI, HTTPException, Depends, Header
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
@@ -22,9 +21,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(lifespan=lifespan)
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 ADMIN_SECRET = os.getenv("ADMIN_SECRET", "change-me-in-production")
 
@@ -47,7 +43,8 @@ class CreateClientRequest(BaseModel):
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    html_file = pathlib.Path(__file__).parent / "templates" / "index.html"
+    return HTMLResponse(content=html_file.read_text())
 
 
 @app.post("/admin/clients", dependencies=[Depends(verify_admin)])
