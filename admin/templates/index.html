@@ -282,7 +282,14 @@
                     </div>
                     <p class="instructions">📋 ${data.instructions}</p>
                 </div>`;
-            loadClients();
+       loadClients();
+            // Form clear karo
+            document.getElementById('email').value = '';
+            document.getElementById('dbHost').value = '';
+            document.getElementById('dbName').value = '';
+            document.getElementById('dbUser').value = '';
+            document.getElementById('dbPassword').value = '';
+            document.getElementById('dbType').value = 'mysql';
         } else {
             el.innerHTML = `<p class="error-msg">Error: ${data.detail}</p>`;
         }
@@ -360,6 +367,7 @@
             document.getElementById('detailUrl').textContent = data.mcp_url;
             currentClient.mcp_url = data.mcp_url;
             alert('New token generated! Share new URL with client.');
+             loadClients();
         } else {
             alert('Error: ' + data.detail);
         }
