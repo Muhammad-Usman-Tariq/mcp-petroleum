@@ -187,6 +187,7 @@
                 <h2 id="detailEmail"></h2>
                 <p id="detailDbInfo"></p>
             </div>
+             <button class="primary" style="margin-right:0.5rem;" onclick="regenerateClient()">🔄 Regenerate URL</button>
             <button class="danger" id="revokeBtn" onclick="revokeClient()">Revoke Access</button>
         </div>
         <div class="info-grid">
@@ -343,6 +344,25 @@
         const baseUrl = window.location.origin.replace(':8001', ':8000');
         document.getElementById('detailToken').textContent = '(token shown only at creation)';
         document.getElementById('detailUrl').textContent = `${baseUrl}/mcp/(token-at-creation)`;
+    }
+
+    async function regenerateClient() {
+        if (!currentClient) return;
+        if (!confirm(`Regenerate token for ${currentClient.email}? Old URL will stop working.`)) return;
+
+        const res = await fetch(`/admin/clients/${encodeURIComponent(currentClient.email)}/regenerate`, {
+            method: 'POST',
+            headers: { 'x-admin-secret': getSecret() }
+        });
+        const data = await res.json();
+        if (res.ok) {
+            document.getElementById('detailToken').textContent = data.token;
+            document.getElementById('detailUrl').textContent = data.mcp_url;
+            currentClient.mcp_url = data.mcp_url;
+            alert('New token generated! Share new URL with client.');
+        } else {
+            alert('Error: ' + data.detail);
+        }
     }
 
     async function revokeClient() {

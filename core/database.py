@@ -72,7 +72,8 @@ class MasterDB:
                     db_password VARCHAR(255) NOT NULL,
                     db_schema VARCHAR(255),
                     is_active BOOLEAN DEFAULT TRUE,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                     mcp_url VARCHAR(500)
                 )
             """)
             await conn.execute("""
@@ -154,18 +155,32 @@ class MasterDB:
 
     async def create_client(self, email: str, db_type: str, db_host: str,
                             db_port: int, db_name: str, db_user: str,
-                            db_password: str, db_schema: Optional[str] = None) -> str:
+                            db_password: str, db_schema: Optional[str] = None,
+                            mcp_url: Optional[str] = None) -> str:
         from core.auth import generate_token, hash_token
         token = generate_token()
         t_hash = hash_token(token)
         async with self.pool.acquire() as conn:
             await conn.execute("""
                 INSERT INTO clients (email, token_hash, db_type, db_host, db_port,
-                db_name, db_user, db_password, db_schema)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                db_name, db_user, db_password, db_schema, mcp_url)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             """, email, t_hash, db_type, db_host, db_port,
-                db_name, db_user, db_password, db_schema)
+                db_name, db_user, db_password, db_schema, mcp_url)
         return token
+
+    async def regenerate_token(self, email: str, mcp_url: str) -> str:
+        from core.auth import generate_token, hash_token
+        token = generate_token()
+        t_hash = hash_token(token)
+        async with self.pool.acquire() as conn:
+            await conn.execute("""
+                UPDATE clients
+                SET token_hash = $1, mcp_url = $2, is_active = TRUE
+                WHERE email = $3
+            """, t_hash, mcp_url, email)
+        return token
+
 
     async def list_clients(self) -> list:
         async with self.pool.acquire() as conn:
