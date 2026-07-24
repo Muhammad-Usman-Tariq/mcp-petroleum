@@ -5,162 +5,358 @@
     <title>MCP Petroleum Admin</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 2rem; }
-        h1 { color: #f59e0b; margin-bottom: 2rem; font-size: 1.8rem; }
-        h2 { color: #94a3b8; margin-bottom: 1rem; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        .card { background: #1e293b; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid #334155; }
-        input, select { width: 100%; padding: 0.6rem 0.8rem; background: #0f172a; border: 1px solid #475569; border-radius: 8px; color: #e2e8f0; margin-bottom: 0.8rem; font-size: 0.9rem; }
-        input:focus, select:focus { outline: none; border-color: #f59e0b; }
-        button { background: #f59e0b; color: #0f172a; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.95rem; }
-        button:hover { background: #d97706; }
-        .result { background: #0f172a; border-radius: 8px; padding: 1rem; margin-top: 1rem; border: 1px solid #334155; word-break: break-all; }
-        .token-box { color: #34d399; font-family: monospace; font-size: 0.85rem; }
-        .url-box { color: #60a5fa; font-family: monospace; font-size: 0.85rem; margin-top: 0.5rem; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { text-align: left; padding: 0.6rem; background: #0f172a; color: #94a3b8; border-bottom: 1px solid #334155; }
-        td { padding: 0.6rem; border-bottom: 1px solid #1e293b; }
-        .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
-        .active { background: #064e3b; color: #34d399; }
-        .inactive { background: #450a0a; color: #f87171; }
+        body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px; min-height: 100vh; background: #1e293b;
+            border-right: 1px solid #334155; display: flex; flex-direction: column;
+            position: fixed; left: 0; top: 0; bottom: 0;
+        }
+        .sidebar-header {
+            padding: 1.5rem; border-bottom: 1px solid #334155;
+        }
+        .sidebar-header h1 { color: #f59e0b; font-size: 1.1rem; }
+        .sidebar-header p { color: #64748b; font-size: 0.75rem; margin-top: 0.3rem; }
+        .sidebar-section { padding: 1rem; border-bottom: 1px solid #334155; }
+        .sidebar-section label { font-size: 0.75rem; color: #64748b; display: block; margin-bottom: 0.4rem; }
+        .sidebar-section input {
+            width: 100%; padding: 0.5rem 0.7rem; background: #0f172a;
+            border: 1px solid #475569; border-radius: 6px; color: #e2e8f0; font-size: 0.85rem;
+        }
+        .sidebar-section input:focus { outline: none; border-color: #f59e0b; }
+        .clients-list { flex: 1; overflow-y: auto; padding: 0.5rem; }
+        .clients-list-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.5rem 0.5rem 0.8rem;
+        }
+        .clients-list-header span { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+        .refresh-btn {
+            background: none; border: 1px solid #334155; color: #94a3b8;
+            padding: 0.2rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.75rem;
+        }
+        .refresh-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+        .client-item {
+            padding: 0.7rem 0.8rem; border-radius: 8px; cursor: pointer;
+            margin-bottom: 0.3rem; border: 1px solid transparent; transition: all 0.15s;
+        }
+        .client-item:hover { background: #0f172a; border-color: #334155; }
+        .client-item.active { background: #0f172a; border-color: #f59e0b; }
+        .client-item .name { font-size: 0.85rem; color: #e2e8f0; font-weight: 500; }
+        .client-item .email { font-size: 0.75rem; color: #64748b; margin-top: 0.2rem; }
+        .client-item .badge {
+            display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px;
+            font-size: 0.7rem; font-weight: 600; margin-top: 0.3rem;
+        }
+        .active-badge { background: #064e3b; color: #34d399; }
+        .inactive-badge { background: #450a0a; color: #f87171; }
+
+        /* Main Content */
+        .main { margin-left: 280px; flex: 1; padding: 2rem; }
+
+        .card {
+            background: #1e293b; border-radius: 12px; padding: 1.5rem;
+            margin-bottom: 1.5rem; border: 1px solid #334155;
+        }
+        .card h2 { color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.2rem; }
+
         label { display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.3rem; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
-        #adminSecret { margin-bottom: 1.5rem; }
+        input, select {
+            width: 100%; padding: 0.6rem 0.8rem; background: #0f172a;
+            border: 1px solid #475569; border-radius: 8px; color: #e2e8f0;
+            margin-bottom: 1rem; font-size: 0.9rem;
+        }
+        input:focus, select:focus { outline: none; border-color: #f59e0b; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+        .hint { font-size: 0.75rem; color: #64748b; margin-top: -0.7rem; margin-bottom: 1rem; }
+
+        button.primary {
+            background: #f59e0b; color: #0f172a; border: none;
+            padding: 0.7rem 1.5rem; border-radius: 8px; font-weight: 700;
+            cursor: pointer; font-size: 0.95rem;
+        }
+        button.primary:hover { background: #d97706; }
+        button.danger {
+            background: #ef4444; color: white; border: none;
+            padding: 0.4rem 0.9rem; border-radius: 6px; font-weight: 600;
+            cursor: pointer; font-size: 0.8rem;
+        }
+        button.danger:hover { background: #dc2626; }
+
+        .result { background: #0f172a; border-radius: 8px; padding: 1.2rem; margin-top: 1rem; border: 1px solid #334155; }
+        .token-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
+        .token-label { font-size: 0.75rem; color: #64748b; min-width: 40px; }
+        .token-val { font-family: monospace; font-size: 0.82rem; color: #34d399; flex: 1; word-break: break-all; }
+        .url-val { font-family: monospace; font-size: 0.82rem; color: #60a5fa; flex: 1; word-break: break-all; }
+        .copy-btn {
+            background: #334155; border: none; color: #94a3b8; padding: 0.3rem 0.6rem;
+            border-radius: 4px; cursor: pointer; font-size: 0.75rem; white-space: nowrap;
+        }
+        .copy-btn:hover { background: #475569; color: #e2e8f0; }
+        .instructions { font-size: 0.8rem; color: #64748b; margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid #334155; }
+
+        /* Client Detail View */
+        .client-detail { display: none; }
+        .client-detail.show { display: block; }
+        .detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+        .detail-header h2 { color: #e2e8f0; font-size: 1.2rem; }
+        .detail-header p { color: #64748b; font-size: 0.85rem; margin-top: 0.3rem; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+        .info-item label { color: #64748b; font-size: 0.75rem; }
+        .info-item p { color: #e2e8f0; font-size: 0.9rem; margin-top: 0.2rem; }
+
+        .empty-state { text-align: center; padding: 3rem; color: #64748b; }
+        .empty-state p { margin-top: 0.5rem; font-size: 0.85rem; }
+
+        .error-msg { color: #f87171; font-size: 0.85rem; margin-top: 0.5rem; }
+        .success-msg { color: #34d399; font-size: 0.85rem; margin-top: 0.5rem; }
     </style>
 </head>
 <body>
-    <h1>⛽ Petroleum MCP Admin</h1>
 
-    <div class="card">
-        <label>Admin Secret Key</label>
-        <input type="password" id="adminSecret" placeholder="Enter admin secret..." />
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h1>⛽ Petroleum MCP</h1>
+        <p>Admin Dashboard</p>
     </div>
+    <div class="sidebar-section">
+        <label>Admin Secret Key</label>
+        <input type="password" id="adminSecret" placeholder="Enter secret..." onchange="loadClients()" />
+    </div>
+    <div class="clients-list">
+        <div class="clients-list-header">
+            <span>Clients</span>
+            <button class="refresh-btn" onclick="loadClients()">↻ Refresh</button>
+        </div>
+        <div id="clientsList">
+            <div class="empty-state">
+                <p>Enter secret key to load clients</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div class="card">
+<!-- MAIN CONTENT -->
+<div class="main">
+
+    <!-- Add New Client -->
+    <div class="card" id="addClientCard">
         <h2>Add New Client</h2>
         <label>Email</label>
-        <input type="email" id="email" placeholder="client@example.com" />
+        <input type="email" id="email" placeholder="client@company.com" />
+
         <div class="grid">
             <div>
                 <label>DB Type</label>
-                <select id="dbType">
+                <select id="dbType" onchange="updatePort()">
                     <option value="mysql">MySQL</option>
                     <option value="postgres">PostgreSQL</option>
                 </select>
             </div>
             <div>
-                <label>DB Port</label>
-                <input type="number" id="dbPort" value="3306" />
+                <label>Coolify Service Name</label>
+                <input type="text" id="dbHost" placeholder="mysql-database-abc123" />
+                <p class="hint">Coolify → Database service → name at top</p>
             </div>
         </div>
-        <label>DB Host (internal hostname)</label>
-        <input type="text" id="dbHost" placeholder="mysql-internal-host" />
+
         <div class="grid">
             <div>
                 <label>DB Name</label>
                 <input type="text" id="dbName" placeholder="petroleum_db" />
             </div>
             <div>
-                <label>Schema (optional)</label>
-                <input type="text" id="dbSchema" placeholder="client_schema" />
-            </div>
-        </div>
-        <div class="grid">
-            <div>
                 <label>DB User</label>
                 <input type="text" id="dbUser" placeholder="db_user" />
             </div>
-            <div>
-                <label>DB Password</label>
-                <input type="password" id="dbPassword" placeholder="••••••••" />
-            </div>
         </div>
-        <button onclick="createClient()">Generate Token & URL</button>
+
+        <label>DB Password</label>
+        <input type="password" id="dbPassword" placeholder="••••••••" />
+
+        <button class="primary" onclick="createClient()">Generate Token & URL</button>
         <div id="createResult"></div>
     </div>
 
-    <div class="card">
-        <h2>All Clients</h2>
-        <button onclick="loadClients()" style="margin-bottom:1rem;">Refresh List</button>
-        <div id="clientsTable"></div>
+    <!-- Client Detail View -->
+    <div class="card client-detail" id="clientDetail">
+        <div class="detail-header">
+            <div>
+                <h2 id="detailEmail"></h2>
+                <p id="detailDbInfo"></p>
+            </div>
+            <button class="danger" id="revokeBtn" onclick="revokeClient()">Revoke Access</button>
+        </div>
+        <div class="info-grid">
+            <div class="info-item">
+                <label>DB Type</label>
+                <p id="detailDbType"></p>
+            </div>
+            <div class="info-item">
+                <label>DB Host</label>
+                <p id="detailDbHost"></p>
+            </div>
+            <div class="info-item">
+                <label>Status</label>
+                <p id="detailStatus"></p>
+            </div>
+            <div class="info-item">
+                <label>Created</label>
+                <p id="detailCreated"></p>
+            </div>
+        </div>
+        <div class="result">
+            <div class="token-row">
+                <span class="token-label">Token</span>
+                <span class="token-val" id="detailToken">—</span>
+                <button class="copy-btn" onclick="copy('detailToken')">Copy</button>
+            </div>
+            <div class="token-row">
+                <span class="token-label">URL</span>
+                <span class="url-val" id="detailUrl">—</span>
+                <button class="copy-btn" onclick="copy('detailUrl')">Copy</button>
+            </div>
+            <p class="instructions">📋 Share this URL with your client to use in Claude, ChatGPT, or any MCP-compatible LLM.</p>
+        </div>
     </div>
 
-    <script>
-        function getSecret() {
-            return document.getElementById('adminSecret').value;
-        }
+</div>
 
-        async function createClient() {
-            const payload = {
-                email: document.getElementById('email').value,
-                db_type: document.getElementById('dbType').value,
-                db_host: document.getElementById('dbHost').value,
-                db_port: parseInt(document.getElementById('dbPort').value),
-                db_name: document.getElementById('dbName').value,
-                db_user: document.getElementById('dbUser').value,
-                db_password: document.getElementById('dbPassword').value,
-                db_schema: document.getElementById('dbSchema').value || null,
-            };
+<script>
+    let currentClient = null;
+    let allClients = [];
 
-            const res = await fetch('/admin/clients', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'x-admin-secret': getSecret() },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            const el = document.getElementById('createResult');
+    function getSecret() {
+        return document.getElementById('adminSecret').value;
+    }
 
-            if (res.ok) {
-                el.innerHTML = `
-                    <div class="result">
-                        <div class="token-box">🔑 Token: ${data.token}</div>
-                        <div class="url-box">🔗 MCP URL: ${data.mcp_url}</div>
-                        <div style="color:#94a3b8;margin-top:0.5rem;font-size:0.8rem;">${data.instructions}</div>
-                    </div>`;
-            } else {
-                el.innerHTML = `<div class="result" style="color:#f87171;">Error: ${data.detail}</div>`;
-            }
-        }
+    function updatePort() {
+        // port handled server-side now
+    }
 
-        async function loadClients() {
-            const res = await fetch('/admin/clients', {
-                headers: { 'x-admin-secret': getSecret() }
-            });
-            const data = await res.json();
-            const el = document.getElementById('clientsTable');
+    function copy(id) {
+        const text = document.getElementById(id).textContent;
+        navigator.clipboard.writeText(text);
+        event.target.textContent = 'Copied!';
+        setTimeout(() => event.target.textContent = 'Copy', 1500);
+    }
 
-            if (!res.ok) {
-                el.innerHTML = `<div style="color:#f87171;">Error: ${data.detail}</div>`;
-                return;
-            }
+    async function createClient() {
+        const dbType = document.getElementById('dbType').value;
+        const port = dbType === 'postgres' ? 5432 : 3306;
 
-            if (!data.clients.length) {
-                el.innerHTML = '<div style="color:#64748b;">No clients yet.</div>';
-                return;
-            }
+        const payload = {
+            email: document.getElementById('email').value,
+            db_type: dbType,
+            db_host: document.getElementById('dbHost').value,
+            db_port: port,
+            db_name: document.getElementById('dbName').value,
+            db_user: document.getElementById('dbUser').value,
+            db_password: document.getElementById('dbPassword').value,
+            db_schema: null,
+        };
 
+        const res = await fetch('/admin/clients', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-admin-secret': getSecret() },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        const el = document.getElementById('createResult');
+
+        if (res.ok) {
             el.innerHTML = `
-                <table>
-                    <tr><th>Email</th><th>DB Type</th><th>DB Name</th><th>Status</th><th>Action</th></tr>
-                    ${data.clients.map(c => `
-                        <tr>
-                            <td>${c.email}</td>
-                            <td>${c.db_type}</td>
-                            <td>${c.db_name}</td>
-                            <td><span class="badge ${c.is_active ? 'active' : 'inactive'}">${c.is_active ? 'Active' : 'Inactive'}</span></td>
-                            <td><button onclick="deactivate('${c.email}')" style="background:#ef4444;padding:0.3rem 0.8rem;font-size:0.8rem;">Revoke</button></td>
-                        </tr>
-                    `).join('')}
-                </table>`;
+                <div class="result">
+                    <div class="token-row">
+                        <span class="token-label">Token</span>
+                        <span class="token-val" id="newToken">${data.token}</span>
+                        <button class="copy-btn" onclick="copy('newToken')">Copy</button>
+                    </div>
+                    <div class="token-row">
+                        <span class="token-label">URL</span>
+                        <span class="url-val" id="newUrl">${data.mcp_url}</span>
+                        <button class="copy-btn" onclick="copy('newUrl')">Copy</button>
+                    </div>
+                    <p class="instructions">📋 ${data.instructions}</p>
+                </div>`;
+            loadClients();
+        } else {
+            el.innerHTML = `<p class="error-msg">Error: ${data.detail}</p>`;
+        }
+    }
+
+    async function loadClients() {
+        if (!getSecret()) return;
+        const res = await fetch('/admin/clients', {
+            headers: { 'x-admin-secret': getSecret() }
+        });
+        const data = await res.json();
+        const el = document.getElementById('clientsList');
+
+        if (!res.ok) {
+            el.innerHTML = `<p class="error-msg" style="padding:0.5rem;">Wrong secret key</p>`;
+            return;
         }
 
-        async function deactivate(email) {
-            if (!confirm(`Deactivate ${email}?`)) return;
-            await fetch(`/admin/clients/${encodeURIComponent(email)}`, {
-                method: 'DELETE',
-                headers: { 'x-admin-secret': getSecret() }
-            });
-            loadClients();
+        allClients = data.clients;
+
+        if (!allClients.length) {
+            el.innerHTML = `<div class="empty-state"><p>No clients yet</p></div>`;
+            return;
         }
-    </script>
+
+        el.innerHTML = allClients.map(c => `
+            <div class="client-item ${currentClient?.email === c.email ? 'active' : ''}"
+                 onclick="showClient('${c.email}')">
+                <div class="name">${c.db_name}</div>
+                <div class="email">${c.email}</div>
+                <span class="badge ${c.is_active ? 'active-badge' : 'inactive-badge'}">
+                    ${c.is_active ? 'Active' : 'Inactive'}
+                </span>
+            </div>
+        `).join('');
+    }
+
+    function showClient(email) {
+        const c = allClients.find(x => x.email === email);
+        if (!c) return;
+        currentClient = c;
+
+        // Update sidebar active state
+        document.querySelectorAll('.client-item').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
+        // Show detail card
+        document.getElementById('clientDetail').classList.add('show');
+
+        // Fill details
+        document.getElementById('detailEmail').textContent = c.email;
+        document.getElementById('detailDbInfo').textContent = `${c.db_type.toUpperCase()} — ${c.db_name}`;
+        document.getElementById('detailDbType').textContent = c.db_type.toUpperCase();
+        document.getElementById('detailDbHost').textContent = c.db_host || '—';
+        document.getElementById('detailStatus').innerHTML = `<span class="badge ${c.is_active ? 'active-badge' : 'inactive-badge'}">${c.is_active ? 'Active' : 'Inactive'}</span>`;
+        document.getElementById('detailCreated').textContent = new Date(c.created_at).toLocaleDateString();
+
+        // Token & URL — stored token_hash won't work as token, show notice
+        const baseUrl = window.location.origin.replace(':8001', ':8000');
+        document.getElementById('detailToken').textContent = '(token shown only at creation)';
+        document.getElementById('detailUrl').textContent = `${baseUrl}/mcp/(token-at-creation)`;
+    }
+
+    async function revokeClient() {
+        if (!currentClient) return;
+        if (!confirm(`Revoke access for ${currentClient.email}?`)) return;
+
+        await fetch(`/admin/clients/${encodeURIComponent(currentClient.email)}`, {
+            method: 'DELETE',
+            headers: { 'x-admin-secret': getSecret() }
+        });
+        document.getElementById('clientDetail').classList.remove('show');
+        currentClient = null;
+        loadClients();
+    }
+</script>
 </body>
 </html>
