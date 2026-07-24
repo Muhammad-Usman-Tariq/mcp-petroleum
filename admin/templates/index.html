@@ -268,7 +268,10 @@
         const el = document.getElementById('createResult');
 
         if (res.ok) {
-            el.innerHTML = `
+            const mcpUrl = data.mcp_url;
+const openaiUrl = mcpUrl.replace('/mcp/', '/openai/');
+const geminiUrl = mcpUrl.replace('/mcp/', '/gemini/');
+el.innerHTML = `
                 <div class="result">
                     <div class="token-row">
                         <span class="token-label">Token</span>
@@ -276,9 +279,19 @@
                         <button class="copy-btn" onclick="copy('newToken')">Copy</button>
                     </div>
                     <div class="token-row">
-                        <span class="token-label">URL</span>
-                        <span class="url-val" id="newUrl">${data.mcp_url}</span>
+                        <span class="token-label">Claude</span>
+                        <span class="url-val" id="newUrl">${mcpUrl}</span>
                         <button class="copy-btn" onclick="copy('newUrl')">Copy</button>
+                    </div>
+                    <div class="token-row">
+                        <span class="token-label">GPT</span>
+                        <span class="url-val" id="newOpenaiUrl">${openaiUrl}</span>
+                        <button class="copy-btn" onclick="copy('newOpenaiUrl')">Copy</button>
+                    </div>
+                    <div class="token-row">
+                        <span class="token-label">Gemini</span>
+                        <span class="url-val" id="newGeminiUrl">${geminiUrl}</span>
+                        <button class="copy-btn" onclick="copy('newGeminiUrl')">Copy</button>
                     </div>
                     <p class="instructions">📋 ${data.instructions}</p>
                 </div>`;
