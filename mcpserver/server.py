@@ -158,6 +158,56 @@ async def mcp_endpoint(token: str, request: Request):
         }
 
     raise HTTPException(status_code=400, detail="Unknown method")
+# ─── OpenAI Compatible Endpoint ──────────────────────────────────────────────
+
+@app.get("/openai/{token}")
+async def openai_tools_list(token: str):
+    try:
+        client = await validate_token(token, master_db)
+    except AuthError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    from mcpserver.adapters import TOOLS_OPENAI
+    return {"tools": TOOLS_OPENAI}
+
+
+@app.post("/openai/{token}")
+async def openai_endpoint(token: str, request: Request):
+    try:
+        client = await validate_token(token, master_db)
+    except AuthError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    from mcpserver.adapters import TOOLS_OPENAI, call_tool
+    body = await request.json()
+    tool_name = body.get("tool_name")
+    arguments = body.get("arguments", {})
+    result = await call_tool(tool_name, arguments, client)
+    return {"role": "tool", "content": result}
+
+
+# ─── Gemini Compatible Endpoint ───────────────────────────────────────────────
+
+@app.get("/gemini/{token}")
+async def gemini_tools_list(token: str):
+    try:
+        client = await validate_token(token, master_db)
+    except AuthError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    from mcpserver.adapters import TOOLS_GEMINI
+    return {"function_declarations": TOOLS_GEMINI}
+
+
+@app.post("/gemini/{token}")
+async def gemini_endpoint(token: str, request: Request):
+    try:
+        client = await validate_token(token, master_db)
+    except AuthError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    from mcpserver.adapters import TOOLS_GEMINI, call_tool
+    body = await request.json()
+    tool_name = body.get("name")
+    arguments = body.get("args", {})
+    result = await call_tool(tool_name, arguments, client)
+    return {"name": tool_name, "response": {"content": result}}
 
 
 if __name__ == "__main__":
