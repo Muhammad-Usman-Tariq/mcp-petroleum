@@ -90,6 +90,9 @@ class MasterDB:
                 CREATE INDEX IF NOT EXISTS idx_query_logs_client_id ON query_logs(client_id)
             """)
             await conn.execute("""
+                ALTER TABLE clients ADD COLUMN IF NOT EXISTS mcp_url VARCHAR(500)
+            """)
+            await conn.execute("""
                 CREATE INDEX IF NOT EXISTS idx_query_logs_created_at ON query_logs(created_at)
             """)
             await conn.execute("""
@@ -180,7 +183,6 @@ class MasterDB:
                 WHERE email = $3
             """, t_hash, mcp_url, email)
         return token
-
 
     async def list_clients(self) -> list:
         async with self.pool.acquire() as conn:
